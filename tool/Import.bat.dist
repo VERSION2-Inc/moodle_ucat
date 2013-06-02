@@ -1,0 +1,12 @@
+REM -*- mode: bat-generic -*-
+
+rem SVNからチェックアウトしたディレクトリー
+set projectroot=
+rem Moodleのルートディレクトリー
+set siteroot=
+
+xcopy /s /y %siteroot%\mod\errmarker %projectroot%\mod\errmarker
+xcopy /s /y %siteroot%\blocks\errmarker_config %projectroot%\blocks\errmarker_config
+
+set projectroot=
+set siteroot=

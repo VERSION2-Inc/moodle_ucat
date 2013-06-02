@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<XMLDB PATH="mod/ucat/db" VERSION="20120903" COMMENT="mod/ucat用XMLDB"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
+>
+  <TABLES>
+    <TABLE NAME="ucat" COMMENT="UCATオプション" NEXT="ucat_questions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="course"/>
+        <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="course" NEXT="intro"/>
+        <FIELD NAME="intro" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="name" NEXT="introformat"/>
+        <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="intro" NEXT="attempts"/>
+        <FIELD NAME="attempts" TYPE="int" LENGTH="6" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="introformat" NEXT="timecreated"/>
+        <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attempts" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timecreated" NEXT="userset"/>
+        <FIELD NAME="userset" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timemodified" NEXT="endcondition"/>
+        <FIELD NAME="endcondition" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userset" NEXT="questions"/>
+        <FIELD NAME="questions" TYPE="int" LENGTH="3" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="endcondition" NEXT="se"/>
+        <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="questions" NEXT="record"/>
+        <FIELD NAME="record" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="se" NEXT="logitbias"/>
+        <FIELD NAME="logitbias" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="record" NEXT="questioncategory"/>
+        <FIELD NAME="questioncategory" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="logitbias" NEXT="showstate"/>
+        <FIELD NAME="showstate" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="questioncategory" NEXT="supervisor"/>
+        <FIELD NAME="supervisor" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="showstate" NEXT="debug"/>
+        <FIELD NAME="debug" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="supervisor"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+      <INDEXES>
+        <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
+      </INDEXES>
+    </TABLE>
+    <TABLE NAME="ucat_questions" COMMENT="問題困難度情報" PREVIOUS="ucat" NEXT="ucat_user_sets">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="questionid"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="difficulty"/>
+        <FIELD NAME="difficulty" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="questionid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ucat_user_sets" COMMENT="学生セット情報" PREVIOUS="ucat_questions" NEXT="ucat_users">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="name"/>
+        <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" PREVIOUS="id"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ucat_users" COMMENT="学生能力情報" PREVIOUS="ucat_user_sets" NEXT="ucat_sessions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="userset"/>
+        <FIELD NAME="userset" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userset" NEXT="ability"/>
+        <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ucat_sessions" COMMENT="UCATセッション情報" PREVIOUS="ucat_users" NEXT="ucat_records">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="ucat"/>
+        <FIELD NAME="ucat" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="userid"/>
+        <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="ucat" NEXT="questionsusage"/>
+        <FIELD NAME="questionsusage" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="userid" NEXT="timestarted"/>
+        <FIELD NAME="timestarted" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="questionsusage" NEXT="timefinished"/>
+        <FIELD NAME="timefinished" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timestarted" NEXT="attempt"/>
+        <FIELD NAME="attempt" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="timefinished" NEXT="status"/>
+        <FIELD NAME="status" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="attempt" NEXT="slot"/>
+        <FIELD NAME="slot" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="status" NEXT="questions"/>
+        <FIELD NAME="questions" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="slot" NEXT="states"/>
+        <FIELD NAME="states" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="questions" NEXT="ability"/>
+        <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="states" NEXT="abilright"/>
+        <FIELD NAME="abilright" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="ability" NEXT="se"/>
+        <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="abilright" NEXT="grade"/>
+        <FIELD NAME="grade" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="se"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+    <TABLE NAME="ucat_records" COMMENT="UCAT受験記録" PREVIOUS="ucat_sessions">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" NEXT="session"/>
+        <FIELD NAME="session" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="id" NEXT="seq"/>
+        <FIELD NAME="seq" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="session" NEXT="timemodified"/>
+        <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="seq" NEXT="states"/>
+        <FIELD NAME="states" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="timemodified" NEXT="ability"/>
+        <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="states" NEXT="abilright"/>
+        <FIELD NAME="abilright" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="ability" NEXT="se"/>
+        <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="abilright" NEXT="questionid"/>
+        <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="se" NEXT="difficulty"/>
+        <FIELD NAME="difficulty" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" PREVIOUS="questionid" NEXT="questiontext"/>
+        <FIELD NAME="questiontext" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="difficulty" NEXT="answer"/>
+        <FIELD NAME="answer" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" PREVIOUS="questiontext" NEXT="outofexpect"/>
+        <FIELD NAME="outofexpect" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" PREVIOUS="answer"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+      </KEYS>
+    </TABLE>
+  </TABLES>
+</XMLDB>

@@ -1,0 +1,36 @@
+<?php
+defined('MOODLE_INTERNAL') || die();
+
+$string['ability'] = 'Ability';
+$string['allquestions'] = 'All questions';
+$string['bynumquestions'] = 'Number of questions';
+$string['bynumquestionsandse'] = 'Number of questions and standard error';
+$string['byse'] = 'Standard error';
+$string['debugmode'] = 'Debug mode';
+$string['endcondition'] = 'Ending condition';
+$string['estimatedability'] = 'Estimated ability';
+$string['logitbias'] = 'Logit bias';
+$string['modulename'] = 'UCAT';
+$string['modulenameplural'] = 'UCAT';
+$string['numquestions'] = 'Number of questions';
+$string['pluginadministration'] = 'UCAT administration';
+$string['pluginname'] = 'UCAT';
+$string['probableabilityrange'] = 'Probable ability range';
+$string['probableabilityrange'] = 'Probable ability range';
+$string['questioncategory'] = 'Question category';
+$string['questionsadministered'] = 'Questions administered';
+$string['recordstatus'] = 'Record UCAT status';
+$string['reestimatedifficulties'] = 'Reestimate question difficulties';
+$string['results'] = 'Results';
+$string['results'] = 'Results';
+$string['score'] = 'Score';
+$string['se'] = 'Standard error';
+$string['showstatus'] = 'Show status to students';
+$string['startattempt'] = 'Start attempt';
+$string['supervisormode'] = 'Supervisor mode';
+$string['testtakersname'] = 'Test-taker\'s name';
+$string['ucat:addinstance'] = 'Add a new UCAT';
+$string['ucat:attempt'] = 'Attempt UCAT';
+$string['ucat:manage'] = 'Manage UCAT';
+$string['ucat:view'] = 'View UCAT';
+$string['userset'] = 'Student list';

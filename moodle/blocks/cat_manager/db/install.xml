@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- $Id$ -->
+<XMLDB PATH="blocks/cat_manager/db" VERSION="20120510" COMMENT="blocks/cat_manager用XMLDB" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd">
+    <TABLES>
+        <TABLE NAME="cat_quizzes" COMMENT="小テスト追加属性" NEXT="cat_questions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="quiz"/>
+                <FIELD NAME="quiz" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="usecat"/>
+                <FIELD NAME="usecat" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="quiz" NEXT="userset"/>
+                <FIELD NAME="userset" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="usecat" NEXT="endcondition"/>
+                <FIELD NAME="endcondition" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userset" NEXT="questions"/>
+                <FIELD NAME="questions" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="endcondition" NEXT="se"/>
+                <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="questions" NEXT="record"/>
+                <FIELD NAME="record" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="se" NEXT="logitbias"/>
+                <FIELD NAME="logitbias" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="record" NEXT="questioncategory"/>
+                <FIELD NAME="questioncategory" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="logitbias" NEXT="showstate"/>
+                <FIELD NAME="showstate" TYPE="int" LENGTH="1" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="questioncategory"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="quiz"/>
+                <KEY NAME="quiz" TYPE="foreign" FIELDS="quiz" REFTABLE="quiz" REFFIELDS="id" PREVIOUS="primary" NEXT="userset"/>
+                <KEY NAME="userset" TYPE="foreign" FIELDS="userset" REFTABLE="cat_user_sets" REFFIELDS="id" PREVIOUS="quiz"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="cat_questions" COMMENT="問題難易度情報" PREVIOUS="cat_quizzes" NEXT="cat_user_sets">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="questionid"/>
+                <FIELD NAME="questionid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="difficulty"/>
+                <FIELD NAME="difficulty" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="questionid"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="question"/>
+                <KEY NAME="question" TYPE="foreign" FIELDS="questionid" REFTABLE="question" REFFIELDS="id" PREVIOUS="primary"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="cat_user_sets" COMMENT="学生能力セット" PREVIOUS="cat_questions" NEXT="cat_users">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="name"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="id"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="cat_users" COMMENT="学生能力情報" PREVIOUS="cat_user_sets" NEXT="cat_sessions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="userset"/>
+                <FIELD NAME="userset" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="userid"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userset" NEXT="ability"/>
+                <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="userid"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="userset"/>
+                <KEY NAME="userset" TYPE="foreign" FIELDS="userset" REFTABLE="cat_user_sets" REFFIELDS="id" PREVIOUS="primary" NEXT="userid"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id" PREVIOUS="userset"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="cat_sessions" COMMENT="受験セッション情報" PREVIOUS="cat_users" NEXT="cat_records">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="attempt"/>
+                <FIELD NAME="attempt" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="id" NEXT="questions"/>
+                <FIELD NAME="questions" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="attempt" NEXT="states"/>
+                <FIELD NAME="states" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="questions" NEXT="ability"/>
+                <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="states" NEXT="abilright"/>
+                <FIELD NAME="abilright" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="ability" NEXT="se"/>
+                <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="abilright"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="attempt"/>
+                <KEY NAME="attempt" TYPE="foreign" FIELDS="attempt" REFTABLE="quiz_attempts" REFFIELDS="id" PREVIOUS="primary"/>
+            </KEYS>
+        </TABLE>
+        <TABLE NAME="cat_records" COMMENT="受験経過情報" PREVIOUS="cat_sessions">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true" ENUM="false" NEXT="session"/>
+                <FIELD NAME="session" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="セッション" PREVIOUS="id" NEXT="seq"/>
+                <FIELD NAME="seq" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="連番" PREVIOUS="session" NEXT="timemodified"/>
+                <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" ENUM="false" COMMENT="時刻" PREVIOUS="seq" NEXT="states"/>
+                <FIELD NAME="states" TYPE="text" LENGTH="small" NOTNULL="true" SEQUENCE="false" ENUM="false" PREVIOUS="timemodified" NEXT="ability"/>
+                <FIELD NAME="ability" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="states" NEXT="abilright"/>
+                <FIELD NAME="abilright" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="ability" NEXT="se"/>
+                <FIELD NAME="se" TYPE="float" NOTNULL="true" UNSIGNED="false" DEFAULT="0" SEQUENCE="false" ENUM="false" PREVIOUS="abilright"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id" NEXT="session"/>
+                <KEY NAME="session" TYPE="foreign" FIELDS="session" REFTABLE="cat_sessions" REFFIELDS="id" PREVIOUS="primary"/>
+            </KEYS>
+        </TABLE>
+    </TABLES>
+</XMLDB>
