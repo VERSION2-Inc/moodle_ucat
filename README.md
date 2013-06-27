@@ -38,3 +38,13 @@ Replace <Moodle root> with the full path to your Moodle root directory.
 指定してください。
 
 3. Moodleサイトにログインして、通知を実行してください。
+
+付記:
+------
+
+研究の一部は科学研究費補助金(基盤研究(C)課題番号：22520590）を利用している．
+
+Acknowledgements:
+------
+
+A part of the present study was supported by a Grant-in-Aid for Scientific Research for 2010-2012 (No.22520590) from the Japan Society for the Promotion of Science.
