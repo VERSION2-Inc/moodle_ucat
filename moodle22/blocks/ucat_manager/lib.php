@@ -7,6 +7,8 @@
  * @version $Id: lib.php 19 2012-07-27 09:50:38Z yama $
  */
 
+require_once $CFG->dirroot . '/mod/ucat/locallib.php';
+
 defined('MOODLE_INTERNAL') || die();
 
 define('CAT_ENDCOND_ALL', 0);
@@ -15,16 +17,25 @@ define('CAT_ENDCOND_SE', 2);
 define('CAT_ENDCOND_NUMQUESTANDSE', 3);
 define('CAT_DUMMY_SE', 100);
 
+/**
+ * @deprecated
+ */
 function cat_logit2unit($val) {
-    return (int) ($val * 10 + 100);
+    return ucat::logit2unit($val);
 }
 
+/**
+ * @deprecated
+ */
 function cat_unit2logit($val) {
-    return ($val - 100) * 0.1;
+    return ucat::unit2logit($val);
 }
 
+/**
+ * @deprecated
+ */
 function cat_diff_logit2unit($val) {
-    return (int) ($val * 10);
+    return ucat::diff_logit2unit($val);
 }
 
 function cat_get_ability($uset, $userid) {

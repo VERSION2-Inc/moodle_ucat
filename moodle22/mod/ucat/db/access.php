@@ -12,6 +12,7 @@ $capabilities = array(
                 ),
                 'clonepermissionsfrom' => 'moodle/course:manageactivities'
         ),
+
         'mod/ucat:view' => array(
                 'captype' => 'read',
                 'contextlevel' => CONTEXT_MODULE,

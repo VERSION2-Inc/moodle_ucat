@@ -9,31 +9,41 @@ $ucat = new ucat($cm);
 
 require_login($cm->course, true, $cm);
 
+$ucat->require_manager();
+
 if (optional_param('export', 0, PARAM_BOOL)) {
     $sessions = $DB->get_records_sql('
-            SELECT s.*, u.lastname, u.firstname
+            SELECT s.*,
+                '.ucat::get_user_fields('u').'
                 FROM {ucat_sessions} s
                     left JOIN {user} u ON s.userid = u.id
+                WHERE ucat = :ucat
                 ORDER BY s.id DESC
-            '
+            ',
+            ['ucat' => $cm->instance]
     );
+    $o = '';
     foreach ($sessions as $session) {
-            $quba = question_engine::load_questions_usage_by_activity($session->questionsusage);
+        $quba = question_engine::load_questions_usage_by_activity($session->questionsusage);
         $slots = $quba->get_slots();
         $questions = '';
         foreach ($slots as $slot) {
             $at = $quba->get_question_attempt($slot);
-            $questions.=' '.$at->get_question()->name.'-'.($at->get_fraction()?'correct':'wrong');
+            $questions .= ' '.$at->get_question()->name.'-'.($at->get_fraction()?'correct':'wrong');
         }
         $data = array(
-                fullname($session),
-                ucat::logit2unit($session->ability),
-                ucat::logit2unit($session->se),
-                ucat::format_ability_range($session->ability, $session->se),
-                $questions
+            fullname($session),
+            date('Y-m-d H:i:s', $session->timestarted),
+            ucat::logit2unit($session->ability),
+            ucat::diff_logit2unit($session->se),
+            ucat::format_ability_range($session->ability, $session->se, '-'),
+            $questions
         );
-        echo implode(',', $data)."\n";
+        $o .= implode(',', $data)."\n";
     }
+
+    $filename = $ucat->name . '-' . date('Ymd-Hi') . '.csv';
+    send_file($o, $filename, null, 0, true);
 
 } else if ($id = optional_param('session', 0, PARAM_INT)) {
     $PAGE->set_url('/mod/ucat/view.php');
@@ -61,8 +71,9 @@ if (optional_param('export', 0, PARAM_BOOL)) {
 
     $PAGE->set_url('/mod/ucat/view.php');
     $PAGE->set_title($cm->name);
+    $PAGE->set_heading($cm->name);
     $url = new moodle_url('/mod/ucat/view.php', array('id' => $cmid));
-    $PAGE->navbar->add($cm->name, $url);
+    $PAGE->navbar->add(ucat::str('results'));
     $reporturl = new moodle_url('/mod/ucat/report.php');
 
     echo $OUTPUT->header();
@@ -71,13 +82,14 @@ if (optional_param('export', 0, PARAM_BOOL)) {
 
     $table = new flexible_table('ucatattempts');
     $table->set_attribute('class', 'generaltable generalbox');
-    $columns = array('userid', 'ability', 'se', 'abilityrange', 'questions');
+    $columns = array('userid', 'timestart', 'ability', 'se', 'abilityrange', 'questions');
     $headers = array(
-            'User',
-            get_string('ability', 'ucat'),
-            get_string('se', 'ucat'),
-            get_string('probableabilityrange', 'ucat'),
-            get_string('questionsadministered', 'ucat')
+        get_string('user'),
+        get_string('timestarted', 'ucat'),
+        get_string('ability', 'ucat'),
+        get_string('se', 'ucat'),
+        get_string('probableabilityrange', 'ucat'),
+        get_string('questionsadministered', 'ucat')
     );
     $table->baseurl = $url;
     $table->define_columns($columns);
@@ -85,11 +97,14 @@ if (optional_param('export', 0, PARAM_BOOL)) {
     $table->setup();
 
     $sessions = $DB->get_records_sql('
-            SELECT s.*, u.lastname, u.firstname
+            SELECT s.*,
+                '.ucat::get_user_fields('u').'
                 FROM {ucat_sessions} s
-                    left JOIN {user} u ON s.userid = u.id
-                ORDER BY s.id DESC
-            '
+                    JOIN {user} u ON s.userid = u.id
+                WHERE ucat = :ucat
+                ORDER BY s.timestarted DESC
+            ',
+            ['ucat' => $cm->instance]
     );
 
     foreach ($sessions as $session) {
@@ -105,18 +120,21 @@ if (optional_param('export', 0, PARAM_BOOL)) {
                 'session' => $session->id)), fullname($session));
 
         $data = array(
-                $user,
-                ucat::logit2unit($session->ability),
-                ucat::logit2unit($session->se),
-                ucat::format_ability_range($session->ability, $session->se),
-                $questions
+            $user,
+            userdate($session->timestarted),
+            ucat::logit2unit($session->ability),
+            ucat::diff_logit2unit($session->se),
+            ucat::format_ability_range($session->ability, $session->se),
+            $questions
         );
         $table->add_data($data);
     }
 
     $table->finish_html();
 
-    echo $OUTPUT->single_button(new moodle_url('/mod/ucat/report.php', array('cmid' => $cmid, 'export' => 1)), 'Export');
+    echo $OUTPUT->single_button(
+        new moodle_url('/mod/ucat/report.php', array('cmid' => $cmid, 'export' => 1)),
+        ucat::str('export'));
 
     echo $OUTPUT->footer();
 }

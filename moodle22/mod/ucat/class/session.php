@@ -8,6 +8,17 @@ class ucat_session {
     const STATUS_FINISHED = 3;
     const STATUS_REESTIMATED = 4;
 
+    public $session;
+    private $id;
+    private $questionsusage;
+    /**
+     * @var \stdClass
+     */
+    private $ucat;
+    private $cm;
+    private $questions;
+    public $currentquestion;
+
     /**
      *
      * @param int $sessionid
@@ -283,18 +294,23 @@ class ucat_session {
             return '';
         }
 
-        $html = 'ability: '.$this->session->ability
-            .' abilright: '.$this->session->abilright
-            .' se:'.$this->session->se;
-
-        return $html;
+        $floatformat = '%.2f';
+        $table = new html_table();
+        $table->data = array(
+                array(ucat::str('ability'), sprintf($floatformat, $this->session->ability)),
+                array(ucat::str('abilityright'), sprintf($floatformat, $this->session->abilright)),
+                array(ucat::str('se'), sprintf($floatformat, $this->session->se))
+        );
+        return html_writer::table($table);
     }
 
     public function finish() {
         global $DB;
 
-        $user = new ucat_user($this->ucat->userset, $this->session->userid);
-        $user->set_ability($this->session->ability);
+        if ($this->ucat->saveability) {
+            $user = new ucat_user($this->ucat->userset, $this->session->userid);
+            $user->set_ability($this->session->ability);
+        }
 
         $this->session->timefinished = time();
         $this->session->status = self::STATUS_FINISHED;
@@ -312,18 +328,14 @@ class ucat_session {
 
         $question = new ucat_question($this->currentquestion);
 
-        $lines = array(
-                'Difficulty: '.ucat::logit2unit($question->get_difficulty()),
-                get_string('testtakersname', 'ucat').': '.fullname($user),
-                get_string('estimatedability', 'ucat').': '.ucat::logit2unit($this->session->ability),
-                get_string('probableabilityrange', 'ucat').': '.ucat::format_ability_range($this->session->ability, $this->session->se),
-                get_string('score', 'ucat').': '.-1
+        $table = new html_table();
+        $table->data = array(
+                array(ucat::str('difficulty'), ucat::logit2unit($question->get_difficulty())),
+                array(ucat::str('testtakersname'), fullname($user)),
+                array(ucat::str('estimatedability'), ucat::logit2unit($this->session->ability)),
+                array(ucat::str('probableabilityrange'), ucat::format_ability_range($this->session->ability, $this->session->se))
         );
-        $html = $OUTPUT->box(
-                html_writer::tag('div', implode(html_writer::empty_tag('br'), $lines))
-        );
-
-        return $html;
+        return html_writer::table($table);
     }
 
     /**
@@ -335,16 +347,12 @@ class ucat_session {
 
         $user = $DB->get_record('user', array('id' => $this->session->userid));
 
-        $lines = array(
-                get_string('testtakersname', 'ucat').': '.fullname($user),
-                get_string('estimatedability', 'ucat').': '.ucat::logit2unit($this->session->ability),
-                get_string('probableabilityrange', 'ucat').': '.ucat::format_ability_range($this->session->ability, $this->session->se),
-                get_string('score', 'ucat').': '.-1
+        $table = new html_table();
+        $table->data = array(
+                array(ucat::str('testtakersname'), fullname($user)),
+                array(ucat::str('estimatedability'), ucat::logit2unit($this->session->ability)),
+                array(ucat::str('probableabilityrange'), ucat::format_ability_range($this->session->ability, $this->session->se))
         );
-        $html = $OUTPUT->box(
-                html_writer::tag('div', implode(html_writer::empty_tag('br'), $lines))
-        );
-
-        return $html;
+        return html_writer::table($table);
     }
 }

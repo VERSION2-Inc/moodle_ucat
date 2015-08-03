@@ -4,7 +4,7 @@
  *
  * @package ucat
  * @author  VERSION2 Inc.
- * @version $Id: quizzes.php 23 2012-09-04 00:24:02Z yama $
+ * @version $Id: quizzes.php 34 2013-10-22 03:18:33Z yama $
  */
 
 require_once '../../config.php';
@@ -12,7 +12,7 @@ require_once 'lib.php';
 require_once $CFG->libdir.'/tablelib.php';
 
 class cat_quizzes {
-    public function render() {
+    public static function render() {
         global $DB, $PAGE, $OUTPUT, $course, $context;
 
         $PAGE->set_course($course);

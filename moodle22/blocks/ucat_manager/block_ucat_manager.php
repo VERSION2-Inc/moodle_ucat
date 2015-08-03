@@ -24,7 +24,7 @@ class block_ucat_manager extends block_base {
         $this->content->text = '';
         $this->content->footer = '';
 
-        if (has_capability('mod/quiz:manage', get_context_instance(CONTEXT_COURSE, $COURSE->id))) {
+        if (has_capability('mod/quiz:manage', context_course::instance($COURSE->id))) {
             $this->content->text = '<strong>' . get_string('admin', 'block_ucat_manager') . '</strong><br/>'
                 .$OUTPUT->action_link(new moodle_url('/blocks/ucat_manager/users.php', array('courseid' => $COURSE->id)),
                         get_string('users', 'block_ucat_manager')).'<br/>'

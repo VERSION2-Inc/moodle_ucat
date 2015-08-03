@@ -2,6 +2,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 class ucat_user {
+    private $userset;
+    private $userid;
     private $user;
     private $ability;
 
@@ -23,7 +25,7 @@ class ucat_user {
         if ($cq = $DB->get_record('ucat_users', array('userset' => $userset, 'userid' => $userid))) {
             $this->ability = $cq->ability;
         } else {
-            $this->ability = ucat::DEFAULT_DIFFICULTY;
+            $this->ability = 0;
         }
     }
 
@@ -43,12 +45,11 @@ class ucat_user {
         global $DB;
 
         if (!$DB->record_exists('ucat_users', array('userset' => $this->userset, 'userid' => $this->userid))) {
-
             $DB->insert_record('ucat_users', array('userset' => $this->userset, 'userid' => $this->userid));
         }
 
         $cuser = $DB->get_record('ucat_users', array('userset' => $this->userset, 'userid' => $this->userid));
-        $cuser->ability;
+        $cuser->ability = $ability;
         $DB->update_record('ucat_users', $cuser);
     }
 

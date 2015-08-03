@@ -14,10 +14,12 @@ defined('MOODLE_INTERNAL') || die();
  * @param stdClass $ucat
  * @return int
  */
-function ucat_add_instance(stdClass $ucat) {
+function ucat_add_instance($ucat, $form) {
     global $DB;
 
     $ucat->id = $DB->insert_record('ucat', $ucat);
+
+//     ucat::save_target_probability($ucat);
 
     return $ucat->id;
 }
@@ -27,11 +29,13 @@ function ucat_add_instance(stdClass $ucat) {
  * @param stdClass $ucat
  * @return bool
  */
-function ucat_update_instance(stdClass $ucat) {
+function ucat_update_instance($ucat, $form) {
     global $DB;
 
     $ucat->id = $ucat->instance;
     $DB->update_record('ucat', $ucat);
+
+//     ucat::save_target_probability($ucat);
 
     return true;
 }
@@ -43,6 +47,16 @@ function ucat_update_instance(stdClass $ucat) {
  */
 function ucat_delete_instance($id) {
     global $DB;
+
+    $DB->delete_records('ucat_target_probabilities', array('ucat' => $id));
+
+    $sessions = $DB->get_records('ucat_sessions', array('ucat' => $id), '', 'id');
+    foreach ($sessions as $sess)
+        $DB->delete_records('ucat_records', array('ucatsession' => $sess->id));
+
+    $DB->delete_records('ucat_sessions', array('ucat' => $id));
+
     $DB->delete_records('ucat', array('id' => $id));
+
     return true;
 }

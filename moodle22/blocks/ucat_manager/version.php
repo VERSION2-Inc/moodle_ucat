@@ -9,4 +9,7 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2012070200;
+$plugin->version = 2015072900;
+$plugin->requires = 2011112900;
+$plugin->component = 'block_ucat_manager';
+$plugin->dependencies = ['mod_ucat' => 2015072300];

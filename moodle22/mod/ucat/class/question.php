@@ -2,6 +2,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 class ucat_question {
+    private $id;
     private $question;
     private $difficulty;
 
@@ -19,7 +20,7 @@ class ucat_question {
         if ($cq = $DB->get_record('ucat_questions', array('questionid' => $questionid))) {
             $this->difficulty = $cq->difficulty;
         } else {
-            $this->difficulty = ucat::DEFAULT_DIFFICULTY;
+            $this->difficulty = 0;
         }
     }
 

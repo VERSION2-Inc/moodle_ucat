@@ -4,16 +4,17 @@
  *
  * @package ucat
  * @author  VERSION2 Inc.
- * @version $Id: questions.php 23 2012-09-04 00:24:02Z yama $
+ * @version $Id: questions.php 35 2013-10-22 03:44:24Z yama $
  */
 
 require_once '../../config.php';
 require_once(dirname(__FILE__) . '/lib.php');
+require_once $CFG->dirroot . '/mod/ucat/locallib.php';
 
 $courseid = required_param('courseid', PARAM_INT);
 $course = $DB->get_record('course', array('id' => $courseid), '*', MUST_EXIST);
-$qcatid = optional_param('qcat', 0, PARAM_INT);
-$context = get_context_instance(CONTEXT_COURSE, $course->id);
+$qcatid = optional_param('qcat', 0, PARAM_TEXT);
+$context = \context_course::instance($course->id);
 
 require_capability('mod/quiz:manage', $context);
 
@@ -51,34 +52,38 @@ if (optional_param('save', 0, PARAM_BOOL)) {
     $questions = $DB->get_records('question', array('category' => $qcatid));
     $catquestions = $DB->get_records('ucat_questions');
 
-    echo implode(',',array(
-            'ID',
-            get_string('name'),
-            get_string('ability', 'ucat')))."\n";
-    foreach ($questions as $questions) {
-            $def = 100;
-                foreach ($catquestions as $catquestion) {
-                if ($catquestion->questionid == $question->id) {
-                    $def = cat_logit2unit($catquestion->difficulty);
-                    break;
-                }
-            }
+	header('Content-Type: application/octet-stream');
+	header('Content-Disposition: attachment; filename=ucatquestions.csv');
+	echo implode(',',
+			array(
+					'ID',
+					get_string('name'),
+					get_string('ability', 'ucat')
+			)) . "\n";
+	foreach ($questions as $question) {
+		$def = ucat::logit2unit(0);
+		foreach ($catquestions as $catquestion) {
+			if ($catquestion->questionid == $question->id) {
+				$def = cat_logit2unit($catquestion->difficulty);
+				break;
+			}
+		}
 
-
-            echo implode(',',
-                    array(
-                            $question->id,
-                            $catquestion->difficulty,
-                            $def
-                    ))."\n";
-    }
-    exit();
+		echo implode(',',
+				array(
+						$question->id,
+						$question->name,
+						$def
+				)) . "\n";
+	}
+	exit();
 
 } else if (optional_param('import', 0, PARAM_BOOL)) {
     $fp = fopen($_FILES['file']['tmp_name'], 'r');
     fgets($fp);
     while ($row = fgetcsv($fp)) {
         list($id, $name, $difficulty) = $row;
+        $difficulty = ucat::unit2logit($difficulty);
 
         if ($cquestion = $DB->get_record('ucat_questions', array('questionid' => $id))) {
             $cquestion->difficulty = $difficulty;
@@ -91,6 +96,10 @@ if (optional_param('save', 0, PARAM_BOOL)) {
         }
     }
     fclose($fp);
+    redirect(new \moodle_url('/blocks/ucat_manager/questions.php', [
+        	'courseid' => $courseid,
+        	'qcat' => $qcatid
+    ]));
     redirect("$CFG->wwwroot/blocks/ucat_manager/questions.php?courseid=$courseid");
 }
 
@@ -158,7 +167,7 @@ if ($qcatid) {
 
     foreach ($questions as $question) {
         $opts = '';
-        $def = 50;
+        $def = ucat::logit2unit(0);
         foreach ($catquestions as $catquestion) {
             if ($catquestion->questionid == $question->id) {
                 $def = cat_logit2unit($catquestion->difficulty);
@@ -191,19 +200,22 @@ if ($qcatid) {
     <input type="submit" name="save" value="' . get_string('savechanges') . '"/>
   </form>';
 
-        echo $OUTPUT->box_start()
-            .$OUTPUT->single_button(new moodle_url('questions.php', array('export' => '1',
-                    'courseid' => $courseid
-                  )), 'Export')
-                   .'<div class="center">
+	echo $OUTPUT->box_start() . $OUTPUT->single_button(
+			new moodle_url('questions.php',
+					array(
+							'export' => '1',
+							'courseid' => $courseid,
+							'qcat' => $qcatid
+					)), 'Export')
+					. '<div class="center">
                    <form action="questions.php" method="post" enctype="multipart/form-data">
                    <input type="hidden" name="import" value="1"/>
-                   <input type="hidden" name="courseid" value="'.$courseid.'"/>
+                   <input type="hidden" name="courseid" value="' . $courseid . '"/>
+                   <input type="hidden" name="qcat" value="'.s($qcatid).'"/>
                    <input type="file" name="file"/>
                    <input type="submit" value="Import"/>
                    </form>
-                   </div>'
-            .$OUTPUT->box_end();
+                   </div>' . $OUTPUT->box_end();
 }
 
 echo '

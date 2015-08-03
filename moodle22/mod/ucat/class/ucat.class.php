@@ -4,15 +4,26 @@ defined('MOODLE_INTERNAL') || die();
 require_once $CFG->libdir . '/questionlib.php';
 
 class ucat {
+    const COMPONENT = 'ucat';
+
+    const CAP_MANAGE = 'mod/ucat:manage';
+
+    const TBL_TP = 'ucat_target_probabilities';
+
     const ENDCOND_ALL           = 0;
     const ENDCOND_NUMQUEST      = 1;
     const ENDCOND_SE            = 2;
     const ENDCOND_NUMQUESTANDSE = 3;
 
     const DUMMY_SE = 100;
-    const DEFAULT_DIFFICULTY = 5;
 
     const PREFERRED_BEHAVIOR = 'deferredfeedback';
+
+    const TP_FIRST = 'first';
+    const TP_LAST = 'last';
+    const TP_REST = 'rest';
+
+    public static $tptypes = array(self::TP_FIRST, self::TP_LAST, self::TP_REST);
 
     /**
      *
@@ -38,8 +49,41 @@ class ucat {
         global $DB;
 
         $this->cm = $cm;
-        $this->context = context_module::instance($this->cm->id);
+        $this->context = \context_module::instance($this->cm->id);
         $this->options = $DB->get_record('ucat', array('id' => $cm->instance));
+    }
+
+    public function __get($name) {
+        if (isset($this->options->$name))
+            return $this->options->$name;
+
+        throw new \coding_exception('Undefined property: '.$name);
+    }
+
+    public function has_capability($capability) {
+        return has_capability($capability, $this->context);
+    }
+
+    public function require_capability($capability) {
+        require_capability($capability, $this->context);
+    }
+
+    public function is_manager() {
+        return $this->has_capability(self::CAP_MANAGE);
+    }
+
+    public function require_manager() {
+        $this->require_capability(self::CAP_MANAGE);
+    }
+
+    /**
+     *
+     * @param string $identifier
+     * @param string|\stdClass $a
+     * @return string
+     */
+    public static function str($identifier, $a = null) {
+        return get_string($identifier, self::COMPONENT, $a);
     }
 
     /**
@@ -48,7 +92,7 @@ class ucat {
      * @return int
      */
     public static function logit2unit($val) {
-        return (int)($val * 10 + 100);
+        return self::diff_logit2unit($val) + 100;
     }
 
     /**
@@ -66,7 +110,7 @@ class ucat {
      * @return float
      */
     public static function unit2logit($val) {
-        return ($val - 100) * 0.1;
+        return ($val - 100) / 10;
     }
 
     /**
@@ -153,7 +197,6 @@ class ucat {
             }
             $pability[$p] = 0;
 
-
             $session = $sessions[$sids[$p]];
 
             $user = new ucat_user($this->options->userset, $session->userid);
@@ -174,11 +217,10 @@ class ucat {
         }
 
         // 集計
-        $qtotal = 0;
-        $ptotal = 0;
         $recount = 1;
         $totalcycle = 0;
         while ($recount) {
+            echo "totalcycle=$totalcycle<br>";
             $totalcycle++;
             if ($totalcycle > 10)
                 die;
@@ -193,6 +235,7 @@ class ucat {
             }
 
             for ($p = 0; $p < $pasked; $p++) {
+                echo "p=$p<br>";
                 $presult = 0;
                 $pscore[$p] = 0;
                 for ($q = 0; $q < $qcount; $q++) {
@@ -209,6 +252,7 @@ class ucat {
                     continue;
                 }
 
+                echo "pscore[p]=$pscore[$p],presult=$presult<br>";
                 if ($pscore[$p] > 0 && $pscore[$p] < $presult) {
                     $ptotal++;
                     continue;
@@ -221,9 +265,11 @@ class ucat {
             }
 
             for ($q = 0; $q < $qcount; $q++) {
+                echo "q=$q<br>";
                 if ($qasked[$q] == 0) {
                     continue;
                 }
+                echo "qscore[q]=$qscore[$q],qasked[q]=$qasked[$q]<br>";
                 if ($qscore[$q] > 0 && $qscore[$q] < $qasked[$q]) {
                     $qtotal++;
                     continue;
@@ -234,6 +280,7 @@ class ucat {
                 }
             }
 
+            echo "ptotal=$ptotal,qtotal=$qtotal<br>";
             if ($ptotal < 2 || $qtotal < 2) {
                 echo 'Not enough data to reestimate<br/>';
                 return;
@@ -362,5 +409,47 @@ class ucat {
         }
 
         echo 'Reestimation complete.';
+    }
+
+    public static function save_target_probability(\stdClass $ucat) {
+        global $DB;
+
+        $ucatid = $ucat->id;
+
+        foreach (array(self::TP_FIRST, self::TP_LAST, self::TP_REST) as $type) {
+            $row = $DB->get_record(self::TBL_TP, array(
+                'ucat' => $ucatid,
+                'targettype' => $type
+            ));
+            if ($row) {
+                $row->probability = $ucat->tp[$type]['probability'];
+                if ($type != self::TP_REST)
+                    $row->numquestions = $ucat->tp[$type]['numquestions'];
+                $DB->update_record(self::TBL_TP, $row);
+            } else {
+                $row = (object)array(
+                    'ucat' => $ucatid,
+                    'targettype' => $type,
+                    'probability' => $ucat->tp[$type]['probability']
+                );
+                if ($type != self::TP_REST)
+                    $row->numquestions = $ucat->tp[$type]['numquestions'];
+                $DB->insert_record(self::TBL_TP, $row);
+            }
+        }
+    }
+
+    public static function get_user_fields($tableprefix = null, $includepicture = false) {
+        $o = '';
+
+        if (function_exists('get_all_user_name_fields'))
+            $o .= get_all_user_name_fields(true, $tableprefix);
+        else
+            $o .= "$tableprefix.firstname, $tableprefix.lastname";
+
+        if ($includepicture)
+            $o .= ', ' . \user_picture::fields($tableprefix, null, 'pic_id');
+
+        return $o;
     }
 }

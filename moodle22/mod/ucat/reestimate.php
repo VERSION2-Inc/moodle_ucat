@@ -8,10 +8,10 @@ $ucat = $DB->get_record('ucat', array('id' => $cm->instance));
 
 require_login($cm->course, true, $cm);
 
-$PAGE->set_url('/mod/ucat/view.php');
+$url = new moodle_url('/mod/ucat/view.php', array('id' => $cmid));
+$PAGE->set_url($url);
 $PAGE->set_title($cm->name);
 $PAGE->set_heading($cm->name);
-$url = new moodle_url('/mod/ucat/view.php', array('id' => $cmid));
 
 echo $OUTPUT->header();
 
