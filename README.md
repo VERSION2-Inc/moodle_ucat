@@ -1,8 +1,22 @@
-UCAT Module for Moodle 2.0.x
-======================
+# UCAT Module for Moodle
 
-Installation
-------
+## Moodle 2.2 or later
+
+Use files in moodle_ucat/moodle22 directory.
+
+### Installation
+
+1. Copy "blocks" and "mod" directories to your Moodle root
+directory.
+
+2. Log in to your Moodle site and run Site administration > Notifications.
+
+
+## Moodle 2.0.x
+
+Use files in moodle_ucat/moodle directory.
+
+### Installation
 
 1. Copy "blocks" and "customscripts" directories to your Moodle root
 directory.
@@ -20,8 +34,7 @@ Replace <Moodle root> with the full path to your Moodle root directory.
 3. Log in to your Moodle site and run Site administration > Notifications.
 
 
-インストール方法
-------
+### インストール方法
 
 1. blocksとcustomscriptsディレクトリをMoodleのルートディレクトリにコピーしてく
 ださい。
